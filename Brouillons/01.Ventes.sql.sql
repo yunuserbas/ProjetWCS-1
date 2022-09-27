@@ -10,3 +10,10 @@ Group By products.productName, year(orders.orderDate) Order By products.productL
 
 /* Avec comparaison et taux de variation par rapport au même mois de l'année précédente */
 
+SELECT productLine, productName, sum(orderdetails.quantityOrdered), month(orderdate), year(orderdate) as année_2020, year(orderdate) as année_2021, 
+year(orderdate) as année_2022 
+From orderdetails
+Join products ON orderdetails.productCode=products.productCode
+Join orders ON orders.orderNumber=orderdetails.orderNumber
+Group By year(orderdate), productName
+Order By month(orderdate);
