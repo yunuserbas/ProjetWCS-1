@@ -1,9 +1,29 @@
 
 
 
--- Resources Humaines
+-- RESOURCES HUMAINES
 
-/* Chaque mois, les 2 vendeurs avec le chiffre d'affaire le plus élevé */
+
+
+/* Question : "Chaque mois, les 2 vendeurs avec le chiffre d'affaire le plus élevé" */
+
+------------------- Prèmiere Solution Pour sum(orderdetails.priceEach*quantityOrdered) Comme CA ------------------
+
+WITH turnover as (SELECT employees.employeeNumber,  employees.firstName,  employees.lastName, month(orders.orderDate) as `month`, 
+year(orders.orderDate) as `year`, sum(orderdetails.priceEach*quantityOrdered) as `Chiffre d'Affaire`, row_number() over (partition by `month`, `year`) as row_num
+From customers
+Join employees On employees.employeeNumber=customers.salesRepEmployeeNumber
+Join orders Using (customerNumber)
+Join orderdetails Using (orderNumber)
+Group By employees.firstName,  employees.lastName, `year`, `month`
+Order By `year`, `month`, `Chiffre d'Affaire` desc)
+
+SELECT firstName,  lastName, `year`, `month`, `Chiffre d'Affaire` FROM turnover
+Where row_num < 3;
+
+-------------------------------------------------------------------------------------------------------------------
+------------------- Deuxième Solution Pour sum(amount) Comme CA avec WITH et UNION --------------------------------
+
 
 ----- Star -----
 SELECT firstName, lastName, month(paymentDate), year(paymentDate), sum(amount)
