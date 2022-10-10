@@ -58,9 +58,18 @@ Group By country;
 
 /* Commandes qui n'ont pas encore été payées */
 
-SELECT country, sum(priceEach*quantityOrdered), sum(amount), sum(priceEach*quantityOrdered) - sum(amount) as remain
-FROM customers
-JOIN payments ON payments.customerNumber=customers.customerNumber
-LEFT JOIN orders ON orders.customerNumber=customers.customerNumber
-LEFT JOIN orderdetails USING (orderNumber)
-GROUP BY country, payments.customerNumber;
+
+WITH payeur as
+(
+select customers.customerNumber, customerName, round(sum(amount)) as paye
+from toys_and_models.payments
+inner join customers on customers.customerNumber = payments.customerNumber
+group by customerNumber)
+SELECT*, CA-Paye as RestantDue
+from ( select customerNumber, round(sum(quantityOrdered*priceEach)) as ca, paye
+from orders
+join orderdetails as od using(orderNumber)
+join payeur using(customerNumber)
+WHERE orders.status != 'cancelled'
+group by customerNumber) as result
+ORDER BY RestantDue DESC;
